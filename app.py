@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-#!/usr/bin/env python3
+from dalle3 import generate_image
+
 import os
-from nextcord import Intents, utils
+from nextcord import Intents, utils, File
 from nextcord.ext import commands
 
 intents = Intents.default()
@@ -18,6 +19,21 @@ async def SendMessage(ctx):
     role = utils.get(ctx.guild.roles, name="openai")
     if role in ctx.author.roles:
         await ctx.send('Hello!')
+    else:
+        await ctx.send('Sorry, you do not have the required role to use this command.')
+
+@bot.command(name='dalle-3')
+async def SendMessage(ctx, *, prompt_text: str):
+    role = utils.get(ctx.guild.roles, name="openai")
+    if role in ctx.author.roles:
+        try:
+            # Pass the prompt_text to your function here
+            image_bytes = generate_image(prompt_text)
+            image_file = File(image_bytes, filename='image.png')
+            await ctx.send(file=image_file)
+        except Exception as e:
+            # Send the error message to the Discord chat
+            await ctx.send(f'An error occurred while generating the image: {str(e)}')
     else:
         await ctx.send('Sorry, you do not have the required role to use this command.')
 

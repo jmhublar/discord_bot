@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import io
 import logging
 from openai import OpenAI
 import requests
@@ -13,38 +14,39 @@ logger = logging.getLogger()
 
 client = OpenAI()
 
-# Check if there's any input from stdin
-if select.select([sys.stdin,],[],[],0.0)[0]:
-    # Get the prompt from stdin
-    prompt = sys.stdin.read().strip()
-else:
-    print("No Prompt. Exiting.")
-    sys.exit()
+def generate_image(prompt):
+    try:
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            n=1,
+            size="1024x1024"
+        )
 
-try:
-    response = client.images.generate(
-      model="dall-e-3",
-      prompt=prompt,
-      n=1,
-      size="1024x1024"
-    )
+        # Log the entire response
+        logger.info(response)
 
-    # Log the entire response
-    logger.info(response)
+        # Get the URL of the first image from the response
+        image_url = response.data[0].url
 
-    # Get the URL of the first image from the response
-    image_url = response.data[0].url
+        # Download the image
+        image_response = requests.get(image_url)
 
-    # Download the image
-    image_response = requests.get(image_url)
+        # Check if the request was successful
+        if image_response.status_code == 200:
+            # Get the content of the response
+            image_data = image_response.content
 
-    # Create a timestamp
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            # Read the image data into a byte array
+            image_bytes = io.BytesIO(image_data)
 
-    # Write the image data to a file with a unique name
-    with open(f'dark_{timestamp}.jpg', 'wb') as f:
-        f.write(image_response.content)
+            return image_bytes
 
-except Exception as e:
-    # Log any exceptions that occur
-    logger.error(e)
+        else:
+            logger.error(f"Failed to download image: {image_response.status_code}")
+            return None
+
+    except Exception as e:
+        # Log any exceptions that occur
+        logger.error(e)
+        return None
