@@ -12,7 +12,12 @@ import select
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger()
 
-client = OpenAI()
+# Read the API key from a file
+with open('/mnt/secrets/openai_api_key.txt', 'r') as file:
+    openai_api_key = file.read().strip()
+
+# Pass the API key when creating the OpenAI client
+client = OpenAI(api_key=openai_api_key)
 
 def generate_image(prompt):
     try:

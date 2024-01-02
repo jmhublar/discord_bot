@@ -6,16 +6,11 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/app
+      - secrets:/mnt/secrets
     ports:
       - "80:80"
     command: ["python", "app.py"]
-    secrets:
-      - DISCORD_BOT_TOKEN
-      - OPENAI_API_KEY
 
-secrets: 
-  DISCORD_BOT_TOKEN:
-    file: /mnt/secrets/discord_bot_token.txt
-    # from environment variable (not recommended) 
-  OPENAI_API_KEY:
-    file: /mnt/secrets/openai_api_key.txt
+volumes:
+  secrets:
+    external: true

@@ -6,6 +6,15 @@ import os
 from nextcord import Intents, utils, File
 from nextcord.ext import commands
 
+with open('/mnt/secrets/discord_bot_token.txt', 'r') as file:
+    discord_bot_token = file.read().strip()
+
+with open('/mnt/secrets/openai_api_key.txt', 'r') as file:
+    openai_api_key = file.read().strip()
+
+os.environ['DISCORD_BOT_TOKEN'] = discord_bot_token
+os.environ['OPENAI_API_KEY'] = openai_api_key
+
 intents = Intents.default()
 intents.message_content = True
 
